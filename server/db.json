@@ -1,0 +1,33 @@
+{
+  "courses": [
+    {
+      "id": 1,
+      "name": "Lập trình C",
+      "status": "active"
+    },
+    {
+      "id": 2,
+      "name": "Lập trình Frontend với ReactJS",
+      "status": "inactive"
+    },
+    {
+      "id": 3,
+      "name": "Lập trình Backend với Spring boot",
+      "status": "active"
+    },
+    {
+      "id": 4,
+      "name": "Lập trình Frontend với Vue.JS",
+      "status": "inactive"
+    }
+  ],
+  "users": [
+    {
+      "id": 1,
+      "firstName": "Admin",
+      "lastName": "Demo",
+      "email": "admin@example.com",
+      "password": "123456"
+    }
+  ]
+}
