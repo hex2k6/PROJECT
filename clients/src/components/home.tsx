@@ -1,225 +1,318 @@
 import {
   AppBar,
-  Toolbar,
+  Avatar,
   Box,
   Container,
-  Drawer,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Typography,
-  Stack,
-  Select,
-  MenuItem,
-  Button,
-  TextField,
-  InputAdornment,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  Chip,
-  IconButton,
-  Pagination,
   Divider,
+  IconButton,
+  InputAdornment,
+  Tab,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography,
+  Card,
+  CardContent,
+  Stack,
+  Button,
+  Chip,
 } from "@mui/material";
-import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
-import LibraryBooksOutlinedIcon from "@mui/icons-material/LibraryBooksOutlined";
-import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
-import SearchIcon from "@mui/icons-material/Search";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import AddIcon from "@mui/icons-material/Add";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-import Avatar from "@mui/material/Avatar";
+import FavoriteBorder from "@mui/icons-material/FavoriteBorder";
+import PersonOutline from "@mui/icons-material/PersonOutline";
+import Search from "@mui/icons-material/Search";
+import CheckCircleOutline from "@mui/icons-material/CheckCircleOutline";
+import RadioButtonUnchecked from "@mui/icons-material/RadioButtonUnchecked";
+import ArrowRightAlt from "@mui/icons-material/ArrowRightAlt";
 import { useMemo, useState } from "react";
 
+type Lesson = { name: string; done?: boolean };
 type Course = {
   id: number;
-  name: string;
-  status: "active" | "inactive";
+  title: string;
+  lessons: Lesson[];
+  doneCount?: number;
 };
 
-const ALL: Course[] = [
-  { id: 1, name: "Lập trình C", status: "active" },
-  { id: 2, name: "Lập trình Frontend với ReactJS", status: "inactive" },
-  { id: 3, name: "Lập trình Backend với Spring boot", status: "active" },
-  { id: 4, name: "Lập trình Frontend với Vue.JS", status: "inactive" },
-  { id: 5, name: "Cấu trúc dữ liệu và giải thuật", status: "inactive" },
-  { id: 6, name: "Phân tích và thiết kế hệ thống", status: "inactive" },
-  { id: 7, name: "Toán cao cấp", status: "active" },
-  { id: 8, name: "Tiếng Anh chuyên ngành", status: "inactive" },
-  { id: 9, name: "Python cơ bản", status: "active" },
-  { id: 10, name: "NodeJS nâng cao", status: "inactive" },
-  { id: 11, name: "Kỹ năng mềm", status: "active" },
+const COURSES: Course[] = [
+  {
+    id: 1,
+    title: "HTML cơ bản",
+    lessons: [
+      { name: "Session 01: Tổng quan về HTML", done: true },
+      { name: "Session 02: Thẻ inline và block", done: true },
+      { name: "Session 03: Thẻ hình ảnh", done: false },
+      { name: "Session 04: Thẻ chuyển trang", done: false },
+      { name: "Session 05: Thẻ Semantic", done: false },
+    ],
+  },
+  {
+    id: 2,
+    title: "CSS cơ bản",
+    lessons: [
+      { name: "Session 01: Tổng quan về CSS", done: true },
+      { name: "Session 02: Đưa CSS vào trang Web", done: true },
+      { name: "Session 03: Position", done: false },
+      { name: "Session 04: Flexbox", done: false },
+      { name: "Session 05: Animation", done: false },
+    ],
+  },
+  {
+    id: 3,
+    title: "JavaScript cơ bản",
+    lessons: [
+      { name: "Session 01: Tổng quan ngôn ngữ JavaScript", done: false },
+      { name: "Session 02: Khai báo biến", done: false },
+      { name: "Session 03: Câu lệnh điều kiện", done: false },
+      { name: "Session 04: Vòng lặp", done: false },
+      { name: "Session 05: Mảng", done: false },
+    ],
+  },
+  {
+    id: 4,
+    title: "Lập trình với React.js",
+    lessons: [
+      { name: "Session 01: Tổng quan về React.js", done: false },
+      { name: "Session 02: Props, State, Event", done: false },
+      { name: "Session 03: React Hook", done: false },
+      { name: "Session 04: UI Framework", done: false },
+      { name: "Session 05: React Router", done: false },
+    ],
+  },
+  {
+    id: 5,
+    title: "Lập trình với Java",
+    lessons: [
+      { name: "Session 01: Tổng quan về ngôn ngữ Java", done: false },
+      { name: "Session 02: Khai báo biến", done: false },
+      { name: "Session 03: Cấu lệnh điều kiện", done: false },
+      { name: "Session 04: Vòng lặp", done: false },
+      { name: "Session 05: Mảng", done: false },
+    ],
+  },
+  {
+    id: 6,
+    title: "Lập trình C",
+    lessons: [],
+  },
 ];
+function CourseCard({ course }: { course: Course }) {
+  const finished = course.lessons.filter((l) => l.done).length;
 
-const SIDEBAR_W = 240;
+  return (
+    <Card
+      variant="outlined"
+      sx={{
+        height: "100%",
+        borderRadius: 2,
+        "&:hover": { boxShadow: 1, borderColor: "primary.100" },
+      }}
+    >
+      <CardContent sx={{ p: 2.25 }}>
+        <Typography fontWeight={700} sx={{ mb: 1 }}>
+          {course.title}
+        </Typography>
 
-function StatusChip({ value }: { value: Course["status"] }) {
-  return value === "active" ? (
-    <Chip label="Đang hoạt động" size="small" sx={{ bgcolor: "#e6f7e9", color: "#1a7f37" }} />
-  ) : (
-    <Chip label="Ngừng hoạt động" size="small" sx={{ bgcolor: "#fde8e8", color: "#c62828" }} />
+        {course.lessons.length === 0 ? (
+          <Box
+            sx={{
+              py: 4,
+              textAlign: "center",
+              color: "text.secondary",
+              fontSize: 14,
+            }}
+          >
+            Chưa có bài học nào
+          </Box>
+        ) : (
+          <Stack spacing={1}>
+            {course.lessons.slice(0, 5).map((l, idx) => (
+              <Stack
+                direction="row"
+                spacing={1}
+                key={idx}
+                sx={{ color: l.done ? "success.main" : "text.secondary" }}
+              >
+                {l.done ? (
+                  <CheckCircleOutline fontSize="small" />
+                ) : (
+                  <RadioButtonUnchecked fontSize="small" />
+                )}
+                <Typography variant="body2" noWrap title={l.name}>
+                  {l.name}
+                </Typography>
+              </Stack>
+            ))}
+          </Stack>
+        )}
+
+        {course.lessons.length > 0 && (
+          <Stack direction="row" justifyContent="space-between" sx={{ mt: 1.25 }}>
+            <Chip
+              size="small"
+              color={finished ? "success" : "default"}
+              label={
+                finished ? `${finished}/${course.lessons.length} đã hoàn thành` : "Mới bắt đầu"
+              }
+              variant={finished ? "outlined" : "outlined"}
+            />
+            <Button size="small" endIcon={<ArrowRightAlt />} sx={{ textTransform: "none" }}>
+              Xem thêm
+            </Button>
+          </Stack>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
-export default function CoursesAdmin() {
-  const [status, setStatus] = useState<"all" | "active" | "inactive">("all");
+export default function Home() {
+  const [tab, setTab] = useState<0 | 1 | 2>(0);
   const [q, setQ] = useState("");
-  const [page, setPage] = useState(3); // để nhìn giống mockup (đang ở trang 3)
-  const rowsPerPage = 8;
 
-  const data = useMemo(() => {
-    let d = ALL;
-    if (status !== "all") d = d.filter((c) => c.status === status);
-    if (q.trim()) d = d.filter((c) => c.name.toLowerCase().includes(q.toLowerCase()));
-    return d;
-  }, [status, q]);
-
-  const totalPages = Math.max(1, Math.ceil(data.length / rowsPerPage));
-  const current = data.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+  const filtered = useMemo(() => {
+    const base = COURSES.filter((c) =>
+      c.title.toLowerCase().includes(q.trim().toLowerCase())
+    );
+    if (tab === 1) {
+      return base.filter((c) => c.lessons.some((l) => l.done));
+    }
+    if (tab === 2) {
+      return base.filter((c) => c.lessons.length > 0 && !c.lessons.some((l) => l.done));
+    }
+    return base;
+  }, [tab, q]);
 
   return (
-    <Box sx={{ minHeight: "100dvh", bgcolor: "#f5f7fb" }}>
-      {/* Topbar */}
-      <AppBar elevation={0} position="sticky" sx={{ bgcolor: "#fff", color: "inherit", borderBottom: "1px solid #edf1f5" }}>
-        <Toolbar sx={{ gap: 1, minHeight: 64 }}>
-          <Typography fontWeight={700}>Study Tracker</Typography>
-          <Box sx={{ flex: 1 }} />
-          <IconButton><NotificationsNoneOutlinedIcon /></IconButton>
-          <IconButton><SettingsOutlinedIcon /></IconButton>
-          <Avatar sx={{ width: 28, height: 28 }}>L</Avatar>
-        </Toolbar>
-      </AppBar>
-
-      {/* Sidebar + Content */}
-      <Box sx={{ display: "flex" }}>
-        {/* Sidebar */}
-        <Drawer
-          variant="permanent"
-          sx={{
-            width: SIDEBAR_W,
-            flexShrink: 0,
-            [`& .MuiDrawer-paper`]: {
-              width: SIDEBAR_W,
-              boxSizing: "border-box",
-              borderRight: "1px solid #edf1f5",
-              bgcolor: "#f7f9fc",
-            },
-          }}
-          open
-        >
-          <Toolbar />
-          <List sx={{ px: 1, py: 1 }}>
-            <ListItemButton sx={{ borderRadius: 2 }}>
-              <ListItemIcon><DashboardOutlinedIcon /></ListItemIcon>
-              <ListItemText primary="Thống kê" secondary="Quản lý tiến độ học tập" />
-            </ListItemButton>
-            <ListItemButton selected sx={{ borderRadius: 2, mt: 0.5 }}>
-              <ListItemIcon><LibraryBooksOutlinedIcon /></ListItemIcon>
-              <ListItemText primary="Quản lý môn học" />
-            </ListItemButton>
-            <ListItemButton sx={{ borderRadius: 2, mt: 0.5 }}>
-              <ListItemIcon><MenuBookOutlinedIcon /></ListItemIcon>
-              <ListItemText primary="Quản lý bài học" />
-            </ListItemButton>
-          </List>
-        </Drawer>
-
-        {/* Content */}
-        <Box sx={{ flex: 1 }}>
-          <Container maxWidth="lg" sx={{ py: 3 }}>
-            {/* Header row */}
-            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
-              <Stack direction="row" spacing={1} alignItems="center">
-                <MoreHorizIcon sx={{ color: "text.secondary" }} />
-                <Typography variant="h5" fontWeight={700}>Môn học</Typography>
-              </Stack>
-
-              <Stack direction="row" spacing={1.5}>
-                <Select
-                  value={status}
-                  onChange={(e) => { setStatus(e.target.value as any); setPage(1); }}
-                  size="small"
-                  sx={{ minWidth: 180, bgcolor: "#fff" }}
-                >
-                  <MenuItem value="all">Lọc theo trạng thái</MenuItem>
-                  <MenuItem value="active">Đang hoạt động</MenuItem>
-                  <MenuItem value="inactive">Ngừng hoạt động</MenuItem>
-                </Select>
-                <Button variant="contained" startIcon={<AddIcon />}>Thêm mới môn học</Button>
-              </Stack>
-            </Stack>
-
-            {/* Search */}
+    <Box sx={{ bgcolor: "#ffffff", minHeight: "100dvh" }}>
+      {/* header */}
+      <AppBar
+        elevation={0}
+        position="sticky"
+        sx={{ bgcolor: "#ffffff" }}
+      >
+        <Container maxWidth="lg" sx={{ py: 1.25 }}>
+          <Stack direction="row" alignItems="center" spacing={2}>
             <TextField
-              placeholder="Tìm kiếm môn học theo tên..."
-              value={q}
-              onChange={(e) => { setQ(e.target.value); setPage(1); }}
               size="small"
-              fullWidth
-              sx={{ mb: 2, bgcolor: "#fff" }}
+              placeholder="Tìm kiếm"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              sx={{ flex: 1 }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon />
+                    <Search fontSize="small" />
                   </InputAdornment>
                 ),
               }}
             />
 
-            {/* Table */}
-            <Box sx={{ bgcolor: "#fff", border: "1px solid #edf1f5", borderRadius: 2, overflow: "hidden" }}>
-              <Table>
-                <TableHead>
-                  <TableRow sx={{ "& th": { fontWeight: 700, bgcolor: "#f9fbfd" } }}>
-                    <TableCell width="60%">Tên môn học</TableCell>
-                    <TableCell width="20%">Trạng thái</TableCell>
-                    <TableCell width="20%" align="center">Chức năng</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {current.map((c) => (
-                    <TableRow key={c.id} hover>
-                      <TableCell>{c.name}</TableCell>
-                      <TableCell><StatusChip value={c.status} /></TableCell>
-                      <TableCell align="center">
-                        <IconButton color="error" size="small" sx={{ mr: 0.5 }}><DeleteOutlineIcon /></IconButton>
-                        <IconButton color="warning" size="small"><EditOutlinedIcon /></IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {current.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={3} align="center" sx={{ py: 6, color: "text.secondary" }}>
-                        Không có dữ liệu
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-              <Divider />
-              <Stack alignItems="center" sx={{ py: 1.5 }}>
-                <Pagination
-                  color="primary"
-                  page={page}
-                  onChange={(_, p) => setPage(p)}
-                  count={totalPages < 7 ? totalPages : 20}
-                  siblingCount={1}
-                  boundaryCount={1}
-                  showFirstButton
-                  showLastButton
-                />
-              </Stack>
-            </Box>
-          </Container>
+            <Tabs value={0} sx={{ ".MuiTabs-indicator": { display: "none" } }}>
+              <Tab  label="Trang chủ" />
+              <Tab  label="Môn học" />
+              <Tab label="Bài học" />
+            </Tabs>
+
+            <Box sx={{ flex: 1 }} />
+            <Tooltip title="Yêu thích">
+              <IconButton>
+                <FavoriteBorder />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Tài khoản">
+              <Avatar sx={{ width: 28, height: 28 }}>
+                <PersonOutline fontSize="small" />
+              </Avatar>
+            </Tooltip>
+          </Stack>
+        </Container>
+      </AppBar>
+
+      {/* content */}
+      <Container maxWidth="lg" sx={{ py: 3 }}>
+        <Tabs
+          value={tab}
+          onChange={(_, v) => setTab(v)}
+          sx={{
+            mb: 2,
+            ".MuiTabs-indicator": { height: 3, borderRadius: 2 },
+          }}
+        >
+          <Tab label="Tất cả môn học" />
+          <Tab label="Đã hoàn thành" />
+          <Tab label="Chưa hoàn thành" />
+        </Tabs>
+
+        {/* grid cards */}
+        <Box
+          sx={{
+            display: "grid",
+            gap: 2,
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "1fr 1fr",
+              md: "1fr 1fr 1fr",
+            },
+          }}
+        >
+          {filtered.map((c) => (
+            <CourseCard key={c.id} course={c} />
+          ))}
         </Box>
+      </Container>
+
+      {/* footer */}
+      <Box sx={{ bgcolor: "#0f1114", color: "#bfc5d1", mt: 6, py: 5 }}>
+        <Container maxWidth="lg">
+          <Stack
+            direction={{ xs: "column", md: "row" }}
+            spacing={4}
+            justifyContent="space-between"
+          >
+            <Box sx={{ maxWidth: 380 }}>
+              <Typography fontWeight={700} color="#fff" sx={{ mb: 1 }}>
+                Chúng tôi cung cấp giải pháp học tập
+              </Typography>
+              <Typography variant="body2">
+                Giúp học sinh và sinh viên học tập hiệu quả hơn.
+              </Typography>
+            </Box>
+
+            <Stack direction="row" spacing={6}>
+              <Box>
+                <Typography color="#fff" fontWeight={700} sx={{ mb: 1 }}>
+                  Danh mục
+                </Typography>
+                <FooterItem text="Môn học" />
+                <FooterItem text="Bài học" />
+                <FooterItem text="Ghi chú" />
+              </Box>
+              <Box>
+                <Typography color="#fff" fontWeight={700} sx={{ mb: 1 }}>
+                  Hỗ trợ khách hàng
+                </Typography>
+                <FooterItem text="Tìm kiếm dịch vụ" />
+                <FooterItem text="Điều khoản sử dụng" />
+                <FooterItem text="Chính sách và điều khoản" />
+              </Box>
+            </Stack>
+          </Stack>
+
+          <Divider sx={{ my: 3, borderColor: "rgba(255,255,255,0.1)" }} />
+
+          <Typography variant="caption" color="#9aa3b2">
+            © 2025 Your Academy — All rights reserved.
+          </Typography>
+        </Container>
       </Box>
     </Box>
+  );
+}
+
+function FooterItem({ text }: { text: string }) {
+  return (
+    <Typography variant="body2" sx={{ opacity: 0.9, mb: 0.75 }}>
+      {text}
+    </Typography>
   );
 }

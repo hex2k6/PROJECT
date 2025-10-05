@@ -62,8 +62,7 @@ export default function Login() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        px: { xs: 1.5, sm: 2, md: 6, lg: 10 },
-        bgcolor: "#f5f7fb",
+        bgcolor: "#ffffff",
       }}
     >
       <Box
@@ -73,17 +72,13 @@ export default function Login() {
         sx={{
           width: "100%",
           maxWidth: { xs: 420, sm: 480, md: 560 },
-          bgcolor: "#fff",
-          border: "1px solid #eef0f4",
-          borderRadius: 2,
-          boxShadow: { xs: 0, md: 1 },
-          p: { xs: 2, sm: 3, md: 4 },
+          bgcolor: "#ffffff",
         }}
       >
-        <Typography align="center" fontWeight={800} sx={{ fontSize: { xs: 22, sm: 26 }, mb: 0.5 }}>
+        <Typography fontWeight={800} sx={{ fontSize: { xs: 22, sm: 26 }, mb: 0.5 }}>
           Đăng nhập
         </Typography>
-        <Typography align="center" color="text.secondary" sx={{ fontSize: { xs: 13.5, sm: 14 }, mb: { xs: 2, sm: 3 } }}>
+        <Typography  color="text.secondary" sx={{ fontSize: { xs: 13.5, sm: 14 }, mb: { xs: 2, sm: 3 } }}>
           Đăng nhập tài khoản để sử dụng hệ thống quản lý.
         </Typography>
 
@@ -93,10 +88,10 @@ export default function Login() {
           </Alert>
         )}
 
-        <Grid container spacing={1.5}>
-          <Grid item xs={12}>
+        <Grid container spacing={5}>
+          <Grid item xs={12} width={"100%"}>
+            <Typography variant="subtitle2" sx={{ mb: 0.5 }} fontWeight={600}>Email</Typography>
             <TextField
-              label="Email"
               type="email"
               fullWidth
               autoComplete="email"
@@ -106,9 +101,9 @@ export default function Login() {
             />
           </Grid>
 
-          <Grid item xs={12}>
+          <Grid item xs={12} width={"100%"}>
+            <Typography variant="subtitle2" sx={{ mb: 0.5 }} fontWeight={600}>Mật khẩu</Typography>
             <TextField
-              label="Mật khẩu"
               type={showPassword ? "text" : "password"}
               fullWidth
               autoComplete="current-password"
@@ -146,7 +141,7 @@ export default function Login() {
           </Grid>
         </Grid>
 
-        <Button type="submit" variant="contained" fullWidth disabled={!isValid || isSubmitting} sx={{ mt: { xs: 1.5, sm: 2 } }}>
+        <Button type="submit" variant="contained" fullWidth disabled={isValid || isSubmitting} sx={{ mt: { xs: 1.5, sm: 2 } }}>
           {isSubmitting ? "Đang xử lý..." : "Đăng nhập"}
         </Button>
 

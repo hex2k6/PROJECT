@@ -21,7 +21,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { RegisterFormValues } from "../type/type";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 
-// --- validation ---
+
 const schema = z
   .object({
     firstName: z.string().trim().min(1, "Vui lòng nhập họ và tên đệm"),
@@ -35,7 +35,7 @@ const schema = z
 export default function Register() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const navigate = useNavigate(); // 👉 dùng để chuyển trang
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -50,10 +50,8 @@ export default function Register() {
   });
 
   const onSubmit = async (data: RegisterFormValues) => {
-    // TODO: gọi API tạo tài khoản (nếu có)
     await new Promise((r) => setTimeout(r, 400));
     console.log("Dữ liệu gửi:", data);
-    // 👉 chuyển sang /login sau khi đăng ký
     navigate("/login", { replace: true, state: { justSignedUp: true } });
   };
 
@@ -67,6 +65,7 @@ export default function Register() {
         alignItems: "center",
         justifyContent: "center",
         px: { xs: 1.5, sm: 2, md: 6, lg: 10 },
+        bgcolor: "#ffffff",
       }}
     >
       <Box
@@ -76,11 +75,7 @@ export default function Register() {
         sx={{
           width: "100%",
           maxWidth: { xs: 420, sm: 480, md: 700 },
-          bgcolor: "#fff",
-          border: "1px solid #eef0f4",
-          borderRadius: 2,
-          boxShadow: { xs: 0, md: 1 },
-          p: { xs: 2, sm: 3, md: 4 },
+          bgcolor: "#ffffff",
         }}
       >
         <Typography align="center" fontWeight={700} sx={{ fontSize: { xs: 20, sm: 22, md: 24 }, mb: 0.5 }}>
@@ -90,10 +85,10 @@ export default function Register() {
           Đăng ký tài khoản để sử dụng dịch vụ
         </Typography>
 
-        <Grid container spacing={1.5}>
-          <Grid item xs={12} sm={6}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6} width={341}>
+            <Typography variant="subtitle2" sx={{ mb: 0.5 }} fontWeight={600}>Họ và tên đệm</Typography>
             <TextField
-              label="Họ và tên đệm"
               fullWidth
               autoComplete="given-name"
               error={!!errors.firstName}
@@ -101,9 +96,9 @@ export default function Register() {
               {...register("firstName")}
             />
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid  item xs={12} sm={6} width={341}>
+            <Typography variant="subtitle2" sx={{ mb: 0.5 }} fontWeight={600}>Tên</Typography>
             <TextField
-              label="Tên"
               fullWidth
               autoComplete="family-name"
               error={!!errors.lastName}
@@ -112,10 +107,9 @@ export default function Register() {
             />
           </Grid>
 
-          <Grid item xs={12}>
+          <Grid item xs={12} width={"100%"} >
+            <Typography variant="subtitle2" sx={{ mb: 0.5 }} fontWeight={600}>Email</Typography>
             <TextField
-              label="Email"
-              placeholder="you@company.com"
               type="email"
               fullWidth
               autoComplete="email"
@@ -125,9 +119,9 @@ export default function Register() {
             />
           </Grid>
 
-          <Grid item xs={12}>
+          <Grid item xs={12} width={"100%"} >
+            <Typography variant="subtitle2" sx={{ mb: 0.5 }} fontWeight={600}>Mật khẩu</Typography>
             <TextField
-              label="Mật khẩu"
               type={showPassword ? "text" : "password"}
               fullWidth
               autoComplete="new-password"
@@ -178,7 +172,7 @@ export default function Register() {
           />
         </Box>
 
-        <Button type="submit" variant="contained" fullWidth disabled={!isValid || isSubmitting} sx={{ mt: { xs: 1.5, sm: 2 } }}>
+        <Button type="submit" variant="contained" fullWidth disabled={ isValid || isSubmitting} sx={{ mt: { xs: 1.5, sm: 2 } }}>
           {isSubmitting ? "Đang xử lý..." : "Đăng ký"}
         </Button>
 
