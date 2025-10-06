@@ -7,7 +7,7 @@ import type { Course, CourseStatus } from "../../store/coursesSlice";
 
 type Props = {
   open: boolean;
-  initial?: Partial<Course>;   // khi edit truyền {id, name, status}
+  initial?: Partial<Course>;   
   onClose: () => void;
   onSubmit: (data: { name: string; status: CourseStatus }) => void;
 };
