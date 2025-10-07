@@ -10,6 +10,7 @@ import {
     TextField,
     Tooltip,
     Typography,
+    Divider,
 } from "@mui/material";
 import FavoriteBorder from "@mui/icons-material/FavoriteBorder";
 import PersonOutline from "@mui/icons-material/PersonOutline";
@@ -35,14 +36,22 @@ export default function Home() {
     return (
         <Box sx={{ bgcolor: "#ffffff", minHeight: "100dvh" }}>
             <AppBar elevation={0} position="sticky" sx={{ bgcolor: "#ffffff" }}>
-                <Container maxWidth="lg" sx={{ py: 1.25 , bgcolor: "#ffffff" }}>
-                    <Box display="flex" alignItems="center" gap={2}>
+                <Container maxWidth="lg" sx={{ paddingTop: 3, bgcolor: "#ffffff" }}>
+                    <Box display="flex" alignItems="center" gap={1} >
                         <TextField
+                            variant="outlined"
                             size="small"
                             placeholder="Tìm kiếm"
                             value={q}
                             onChange={(e) => setQ(e.target.value)}
-                            sx={{ flex: 1 }}
+                            sx={{
+                                flex: 30, height: 65, bgcolor: "#f5f5f5ec", borderRadius: 1, justifyContent : "center",
+                                "& .MuiOutlinedInput-root": {
+                                    "& fieldset": { border: "none" },              
+                                    "&:hover fieldset": { border: "none" },        
+                                    "&.Mui-focused fieldset": { border: "none" },  
+                                },
+                            }}
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
@@ -51,13 +60,15 @@ export default function Home() {
                                 ),
                             }}
                         />
+
+
+                        <Box sx={{ flex: 1 }} />
                         <Tabs value={0} sx={{ ".MuiTabs-indicator": { display: "none" } }}>
                             <Tab label="Trang chủ" />
                             <Tab label="Môn học" />
                             <Tab label="Bài học" />
                         </Tabs>
 
-                        <Box sx={{ flex: 1 }} />
                         <Tooltip title="Yêu thích">
                             <IconButton>
                                 <FavoriteBorder />
@@ -70,6 +81,7 @@ export default function Home() {
                         </Tooltip>
                     </Box>
                 </Container>
+                <Divider sx={{ my: 3, borderColor: "#dadada" }} />
             </AppBar>
 
             <Container maxWidth="lg" sx={{ py: 7, bgcolor: "#ffffff" }}>
@@ -97,6 +109,7 @@ export default function Home() {
             </Container>
 
             <Footer />
+
         </Box>
     );
 }
