@@ -7,16 +7,7 @@ export const theme = createTheme({
   },
   shape: { borderRadius: 10 },
   components: {
-    MuiTextField: {
-      defaultProps: { variant: "outlined" },
-      styleOverrides: {
-        root: {
-          "& .MuiInputBase-root": {
-            height: 44, // ~44px tap target
-          },
-        },
-      },
-    },
+   
     MuiButton: {
       styleOverrides: {
         root: {

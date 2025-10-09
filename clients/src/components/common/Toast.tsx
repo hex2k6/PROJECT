@@ -35,7 +35,7 @@ export default function Toast({
       <Paper
         elevation={0}
         sx={{
-          bgcolor: "#2E3853", // xanh đen
+          bgcolor: "#2E3853",
           color: "#fff",
           px: 2.5,
           py: 2,

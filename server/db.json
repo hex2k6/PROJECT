@@ -28,6 +28,34 @@
       "lastName": "Demo",
       "email": "admin@example.com",
       "password": "123456"
+    },
+    {
+      "firstName": "Hex",
+      "lastName": "hex",
+      "email": "hexgaming26@gmail.com",
+      "password": "123456",
+      "id": 2
+    },
+    {
+      "firstName": "Hex",
+      "lastName": "hex",
+      "email": "hexgaming26@gmail.com",
+      "password": "1234567",
+      "id": 3
+    },
+    {
+      "firstName": "Hex",
+      "lastName": "hex",
+      "email": "datkirito5@gmail.com",
+      "password": "123456",
+      "id": 4
+    },
+    {
+      "firstName": "Hex",
+      "lastName": "hex",
+      "email": "khangbgbg12tt@gmail.com",
+      "password": "123456",
+      "id": 5
     }
   ]
 }

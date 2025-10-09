@@ -8,7 +8,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "vite",
-    "server:courses": "json-server --watch server/db.json --port 3000 --delay 300"
+    "server:courses": "json-server --watch server/db.json --port 3000"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
