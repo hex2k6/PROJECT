@@ -227,7 +227,6 @@ export default function Home() {
           </Stack>
         </Container>
       </AppBar>
-
       {/* content */}
       <Container maxWidth="lg" sx={{ py: 3 }}>
         <Tabs

@@ -11,9 +11,8 @@ function FooterItem({ text }: { text: string }) {
 
 export default function Footer() {
     return (
-        // Thẻ Box ngoài có nền đen và full width
         <Box component="footer" sx={{ bgcolor: "#0f1114", color: "#bfc5d1", width: "100%" }}>
-            <Container maxWidth="lg" sx={{ bgcolor: "#0f1114", color: "#bfc5d1", py: 5, width: "100%" }}>
+            <Container maxWidth="lg" sx={{ bgcolor: "#0f1114", color: "#bfc5d1", py: 15, width: "100%" }}>
                 <Stack direction={{ xs: "column", md: "row" }} spacing={4} justifyContent="space-between">
                     <Box sx={{ maxWidth: 380 }}>
                         <Typography fontWeight={700} color="#fff" sx={{ mb: 1 }}>

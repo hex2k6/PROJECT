@@ -35,7 +35,7 @@ export default function CourseCard({ course }: { course: Course }) {
                     <Box
                         sx={{
                             spacing:4,
-                            py: 6,
+                            py: 11,
                             textAlign: "center",
                             color: "text.secondary",
                             fontSize: 14,
@@ -45,7 +45,7 @@ export default function CourseCard({ course }: { course: Course }) {
                         Chưa có bài học nào
                     </Box>
                 ) : (
-                    <Stack spacing={3} bgcolor={"#ffffff"}>
+                    <Stack spacing={4} bgcolor={"#ffffff"}>
                         {course.lessons.slice(0, 5 ).map((l, idx) => (
                             <Stack
                                 direction="row"
@@ -67,7 +67,7 @@ export default function CourseCard({ course }: { course: Course }) {
                 )}
 
                 {course.lessons.length > 0 && (
-                    <Stack alignItems={"center"} sx={{ mt: 2.25 }}>
+                    <Stack alignItems={"center"} marginTop={"auto"} sx={{ mt: 2.25 }}>
                         <Button size="small" color={"#0f0c0cff"} sx={{ textTransform: "none" }}>
                             Xem thêm
                         </Button>

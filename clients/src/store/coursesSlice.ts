@@ -1,85 +1,87 @@
-import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { http, SUBJECTS_URL } from "../lib/api";
 
 export type CourseStatus = "active" | "inactive";
-export type Course = { id: number; name: string; status: CourseStatus };
+export type Course = {
+  id: number;
+  subject_name: string;
+  status: CourseStatus;
+  created_at: string; // ISO
+};
 
-export type CoursesState = {
+type State = {
   list: Course[];
   loading: boolean;
   error?: string | null;
 };
 
-const initialState: CoursesState = {
-  list: [
-    { id: 1, name: "Lập trình C", status: "active" },
-    { id: 2, name: "Lập trình Frontend với ReactJS", status: "inactive" },
-    { id: 3, name: "Lập trình Backend với Spring boot", status: "active" },
-    { id: 4, name: "Lập trình Frontend với Vue.JS", status: "inactive" },
-    { id: 5, name: "Cấu trúc dữ liệu và giải thuật", status: "inactive" },
-    { id: 6, name: "Phân tích và thiết kế hệ thống", status: "inactive" },
-    { id: 7, name: "Toán cao cấp", status: "active" },
-    { id: 8, name: "Tiếng Anh chuyên ngành", status: "inactive" },
-  ],
-  loading: false,
-  error: null,
-};
+const initialState: State = { list: [], loading: false, error: null };
 
-// Giả lập API chậm 600ms
-const delay = (ms = 600) => new Promise((r) => setTimeout(r, ms));
-
-export const addCourse = createAsyncThunk(
-  "courses/addCourse",
-  async (payload: Omit<Course, "id">) => {
-    await delay();
-    const id = Math.floor(Math.random() * 1_000_000);
-    return { id, ...payload } as Course;
-  }
+// ---- Thunks ----
+export const fetchCourses = createAsyncThunk<Course[]>(
+  "courses/fetchAll",
+  async () => await http<Course[]>(SUBJECTS_URL)
 );
 
-export const updateCourse = createAsyncThunk(
-  "courses/updateCourse",
-  async (payload: Course) => {
-    await delay();
-    return payload;
-  }
-);
+export const addCourse = createAsyncThunk<
+  Course,
+  { subject_name: string; status: CourseStatus }
+>("courses/add", async ({ subject_name, status }) => {
+  const body = {
+    subject_name: subject_name.trim(),
+    status,
+    created_at: new Date().toISOString(),
+  };
+  return await http<Course>(SUBJECTS_URL, { method: "POST", body: JSON.stringify(body) });
+});
 
-export const deleteCourse = createAsyncThunk(
-  "courses/deleteCourse",
-  async (id: number) => {
-    await delay();
+export const updateCourse = createAsyncThunk<
+  Course,
+  { id: number; subject_name: string; status: CourseStatus }
+>("courses/update", async ({ id, subject_name, status }) => {
+  // giữ created_at cũ
+  const old = await http<Course>(`${SUBJECTS_URL}/${id}`);
+  return await http<Course>(`${SUBJECTS_URL}/${id}`, {
+    method: "PUT",
+    body: JSON.stringify({ id, subject_name: subject_name.trim(), status, created_at: old.created_at }),
+  });
+});
+
+export const deleteCourse = createAsyncThunk<number, number>(
+  "courses/delete",
+  async (id) => {
+    await http(`${SUBJECTS_URL}/${id}`, { method: "DELETE" });
     return id;
   }
 );
 
-const coursesSlice = createSlice({
+const slice = createSlice({
   name: "courses",
   initialState,
   reducers: {},
-  extraReducers: (builder) => {
-    builder
+  extraReducers: (b) => {
+    b
+      // fetch
+      .addCase(fetchCourses.pending,   (s) => { s.loading = true; s.error = null; })
+      .addCase(fetchCourses.fulfilled, (s, a:PayloadAction<Course[]>) => { s.loading = false; s.list = a.payload; })
+      .addCase(fetchCourses.rejected,  (s, a) => { s.loading = false; s.error = a.error.message ?? "Fetch failed"; })
       // add
-      .addCase(addCourse.pending, (s) => { s.loading = true; s.error = null; })
-      .addCase(addCourse.fulfilled, (s, a: PayloadAction<Course>) => {
-        s.loading = false;
-        s.list.unshift(a.payload);
-      })
-      .addCase(addCourse.rejected, (s) => { s.loading = false; s.error = "Add failed"; })
+      .addCase(addCourse.pending,      (s) => { s.loading = true; s.error = null; })
+      .addCase(addCourse.fulfilled,    (s, a:PayloadAction<Course>) => { s.loading = false; s.list.unshift(a.payload); })
+      .addCase(addCourse.rejected,     (s, a) => { s.loading = false; s.error = a.error.message ?? "Add failed"; })
       // update
-      .addCase(updateCourse.pending, (s) => { s.loading = true; s.error = null; })
-      .addCase(updateCourse.fulfilled, (s, a: PayloadAction<Course>) => {
-        s.loading = false;
-        s.list = s.list.map((c) => (c.id === a.payload.id ? a.payload : c));
+      .addCase(updateCourse.pending,   (s) => { s.loading = true; s.error = null; })
+      .addCase(updateCourse.fulfilled, (s, a:PayloadAction<Course>) => {
+        s.loading = false; const i = s.list.findIndex(x => x.id === a.payload.id); if (i>=0) s.list[i] = a.payload;
       })
-      .addCase(updateCourse.rejected, (s) => { s.loading = false; s.error = "Update failed"; })
+      .addCase(updateCourse.rejected,  (s, a) => { s.loading = false; s.error = a.error.message ?? "Update failed"; })
       // delete
-      .addCase(deleteCourse.pending, (s) => { s.loading = true; s.error = null; })
-      .addCase(deleteCourse.fulfilled, (s, a: PayloadAction<number>) => {
-        s.loading = false;
-        s.list = s.list.filter((c) => c.id !== a.payload);
+      .addCase(deleteCourse.pending,   (s) => { s.loading = true; s.error = null; })
+      .addCase(deleteCourse.fulfilled, (s, a:PayloadAction<number>) => {
+        s.loading = false; s.list = s.list.filter(x => x.id !== a.payload);
       })
-      .addCase(deleteCourse.rejected, (s) => { s.loading = false; s.error = "Delete failed"; });
+      .addCase(deleteCourse.rejected,  (s, a) => { s.loading = false; s.error = a.error.message ?? "Delete failed"; });
   },
 });
 
-export default coursesSlice.reducer;
+export default slice.reducer;

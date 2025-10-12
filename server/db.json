@@ -1,61 +1,158 @@
 {
-  "courses": [
-    {
-      "id": 1,
-      "name": "Lập trình C",
-      "status": "active"
-    },
+  "subjects": [
     {
       "id": 2,
-      "name": "Lập trình Frontend với ReactJS",
-      "status": "inactive"
+      "subject_name": "Javascript",
+      "status": "inactive",
+      "created_at": "2022-03-01T00:00:00.000Z"
     },
     {
       "id": 3,
-      "name": "Lập trình Backend với Spring boot",
-      "status": "active"
+      "subject_name": "Lập trình C",
+      "status": "active",
+      "created_at": "2022-03-01T00:00:00.000Z"
     },
     {
       "id": 4,
-      "name": "Lập trình Frontend với Vue.JS",
-      "status": "inactive"
+      "subject_name": "Lập trình Frontend với ReactJS",
+      "status": "inactive",
+      "created_at": "2022-03-01T00:00:00.000Z"
+    },
+    {
+      "subject_name": "CSS,HTML",
+      "status": "active",
+      "created_at": "2025-10-11T08:52:49.996Z",
+      "id": 5
+    },
+    {
+      "subject_name": "Lập trình JS",
+      "status": "active",
+      "created_at": "2025-10-12T04:12:49.525Z",
+      "id": 6
+    },
+    {
+      "subject_name": "Lập trình hướng đối tượng",
+      "status": "active",
+      "created_at": "2025-10-12T04:13:12.369Z",
+      "id": 7
+    }
+  ],
+  "lessons": [
+    {
+      "id": 1,
+      "subject_id": 3,
+      "lesson_name": "Bài học 1 – Tổng quan HTML",
+      "time": 60,
+      "status": "completed",
+      "created_at": "2022-03-01T00:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "subject_id": 1,
+      "lesson_name": "Bài học 2 – Thẻ inline & block",
+      "time": 45,
+      "status": "completed",
+      "created_at": "2022-03-01T00:00:00.000Z"
+    },
+    {
+      "id": 3,
+      "subject_id": 1,
+      "lesson_name": "Bài học 3 – CSS cơ bản",
+      "time": 50,
+      "status": "completed",
+      "created_at": "2022-03-01T00:00:00.000Z"
+    },
+    {
+      "id": 4,
+      "subject_id": 4,
+      "lesson_name": "Bài học 1 – Tổng quan JS",
+      "time": 55,
+      "status": "incomplete",
+      "created_at": "2022-03-01T00:00:00.000Z"
+    },
+    {
+      "id": 5,
+      "subject_id": 2,
+      "lesson_name": "Bài học 2 – Biến & kiểu dữ liệu",
+      "time": 50,
+      "status": "completed",
+      "created_at": "2022-03-01T00:00:00.000Z"
+    },
+    {
+      "id": 6,
+      "subject_id": 2,
+      "lesson_name": "Bài học 3 – Câu lệnh điều kiện",
+      "time": 45,
+      "status": "incomplete",
+      "created_at": "2022-03-01T00:00:00.000Z"
+    },
+    {
+      "id": 7,
+      "subject_id": 3,
+      "lesson_name": "Bài học 1 – C cơ bản",
+      "time": 60,
+      "status": "incomplete",
+      "created_at": "2022-03-01T00:00:00.000Z"
+    },
+    {
+      "id": 8,
+      "subject_id": 4,
+      "lesson_name": "Bài học 1 – Giới thiệu React",
+      "time": 60,
+      "status": "incomplete",
+      "created_at": "2022-03-01T00:00:00.000Z"
+    },
+    {
+      "id": 9,
+      "subject_id": 2,
+      "lesson_name": "Bài học 5- Kẻ cầm đầu",
+      "time": 45,
+      "status": "completed",
+      "created_at": "2025-10-11T09:12:13.773Z"
+    },
+    {
+      "id": 10,
+      "subject_id": 7,
+      "lesson_name": "qưdfegdrsác",
+      "time": 37,
+      "status": "completed",
+      "created_at": "2025-10-12T04:19:02.103Z"
     }
   ],
   "users": [
-    {
-      "id": 1,
-      "firstName": "Admin",
-      "lastName": "Demo",
-      "email": "admin@example.com",
-      "password": "123456"
-    },
-    {
-      "firstName": "Hex",
-      "lastName": "hex",
-      "email": "hexgaming26@gmail.com",
-      "password": "123456",
-      "id": 2
-    },
     {
       "firstName": "Hex",
       "lastName": "hex",
       "email": "hexgaming26@gmail.com",
       "password": "1234567",
-      "id": 3
+      "id": 3,
+      "role": "user"
     },
     {
       "firstName": "Hex",
       "lastName": "hex",
       "email": "datkirito5@gmail.com",
       "password": "123456",
-      "id": 4
+      "id": 4,
+      "role": "user"
     },
     {
       "firstName": "Hex",
       "lastName": "hex",
       "email": "khangbgbg12tt@gmail.com",
       "password": "123456",
-      "id": 5
+      "id": 5,
+      "role": "user"
+    }
+  ],
+  "admins": [
+    {
+      "id": 1,
+      "firstName": "Admin",
+      "lastName": "System",
+      "email": "admin@example.com",
+      "password": "123456",
+      "role": "admin"
     }
   ]
 }

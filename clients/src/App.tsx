@@ -4,7 +4,7 @@ import { theme } from "./theme";
 
 // Public
 import Homes from "./pages/home/Home";
-import Home from "./components/Home";
+import Home from "./components/home";
 import Login from "./components/Login";
 import Register from "./components/Register";
 
@@ -14,28 +14,34 @@ import Courses from "./pages/admin/Courses";
 import Dashboard from "./pages/admin/Dashboard";
 import Lessons from "./pages/admin/Lessons";
 
+import { RequireAuth, RequireAdmin } from "./components/guards/PrivateRoute";
+
 export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <BrowserRouter>
         <Routes>
-          {/* Public */}
-          <Route path="/homes" element={<Homes />} />
+          {/* public */}
           <Route path="/" element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<Home />} />
+          <Route path="/homes" element={<RequireAuth />}>
+            <Route index element={<Homes/>} />
+          </Route>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* Admin */}
-          <Route path="/admin" element={<Admin />}>
-            <Route index element={<Navigate to="courses" replace />} />
-            <Route path="courses" element={<Courses />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="lessons" element={<Lessons />} />
+          {/* admin */}
+          <Route path="/admin" element={<RequireAdmin />}>
+            <Route element={<Admin />}>
+              <Route index element={<Navigate to="courses" replace />} />
+              <Route path="courses" element={<Courses />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="lessons" element={<Lessons />} />
+            </Route>
           </Route>
 
-          {/* Fallback */}
+          {/* fallback */}
           <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>
       </BrowserRouter>

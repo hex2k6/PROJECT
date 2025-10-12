@@ -7,37 +7,41 @@ import type { Course, CourseStatus } from "../../store/coursesSlice";
 
 type Props = {
   open: boolean;
-  initial?: Partial<Course>;   
+  initial?: Partial<Course>;
   onClose: () => void;
-  onSubmit: (data: { name: string; status: CourseStatus }) => void;
+  // ⬅️ onSubmit bây giờ trả { subject_name, status } để khớp server
+  onSubmit: (data: { subject_name: string; status: CourseStatus }) => void;
 };
 
 export default function CourseFormDialog({ open, initial, onClose, onSubmit }: Props) {
   const isEdit = Boolean(initial?.id);
-  const [name, setName] = useState(initial?.name ?? "");
+
+  // ⬅️ lấy từ subject_name (vẫn hiển thị 1 ô text như cũ)
+  const [subjectName, setSubjectName] = useState(initial?.subject_name ?? "");
   const [status, setStatus] = useState<CourseStatus>(initial?.status ?? "active");
   const [touched, setTouched] = useState(false);
 
   useEffect(() => {
-    setName(initial?.name ?? "");
+    setSubjectName(initial?.subject_name ?? "");
     setStatus(initial?.status ?? "active");
     setTouched(false);
   }, [open, initial]);
 
-  const nameError = touched && !name.trim();
+  const nameError = touched && !subjectName.trim();
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>{isEdit ? "Sửa môn học" : "Thêm mới môn học"}</DialogTitle>
+
       <DialogContent dividers>
         <Stack spacing={2} sx={{ mt: 1 }}>
           <div>
             <Typography variant="subtitle2" sx={{ mb: 0.5 }}>Tên môn học</Typography>
             <TextField
               fullWidth
-              value={name}
+              value={subjectName}
               onBlur={() => setTouched(true)}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => setSubjectName(e.target.value)}
               error={!!nameError}
               helperText={nameError ? "Tên môn học không được để trống" : " "}
             />
@@ -50,7 +54,7 @@ export default function CourseFormDialog({ open, initial, onClose, onSubmit }: P
               value={status}
               onChange={(e) => setStatus(e.target.value as CourseStatus)}
             >
-              <FormControlLabel value="active" control={<Radio />} label="Đang hoạt động" />
+              <FormControlLabel value="active"   control={<Radio />} label="Đang hoạt động" />
               <FormControlLabel value="inactive" control={<Radio />} label="Ngừng hoạt động" />
             </RadioGroup>
           </div>
@@ -63,8 +67,9 @@ export default function CourseFormDialog({ open, initial, onClose, onSubmit }: P
           variant="contained"
           onClick={() => {
             setTouched(true);
-            if (!name.trim()) return;
-            onSubmit({ name: name.trim(), status });
+            if (!subjectName.trim()) return;
+            // ⬅️ gửi đúng shape cho slice/server
+            onSubmit({ subject_name: subjectName.trim(), status });
           }}
         >
           {isEdit ? "Lưu" : "Thêm"}

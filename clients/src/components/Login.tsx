@@ -23,7 +23,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { LoginFormValues, User } from "../type/type";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
-import { USERS_URL, http } from "../lib/api";
+import { USERS_URL, ADMINS_URL, http } from "../lib/api"; // <-- thêm ADMINS_URL
 
 const schema = z.object({
   email: z.string().trim().min(1, "Vui lòng nhập email").email("Email không hợp lệ"),
@@ -45,6 +45,8 @@ export default function Login() {
   const location = useLocation() as any;
   const justSignedUp = location.state?.justSignedUp === true;
   const emailPrefill = location.state?.emailPrefill as string | undefined;
+  const requireAuth = location.state?.requireAuth === true;
+  const loggedOut = location.state?.loggedOut === true;
 
   const {
     handleSubmit,
@@ -57,6 +59,7 @@ export default function Login() {
     defaultValues: { email: "", password: "", remember: false },
   });
 
+  // Prefill email (vừa đăng ký xong hoặc “nhớ tài khoản”)
   useEffect(() => {
     if (emailPrefill) setValue("email", emailPrefill);
     else {
@@ -65,12 +68,66 @@ export default function Login() {
     }
   }, [emailPrefill, setValue]);
 
+  // Thông báo từ các điều hướng bắt buộc/đăng xuất
+  useEffect(() => {
+    if (requireAuth) {
+      setToast({
+        open: true,
+        kind: "error",
+        title: "Yêu cầu đăng nhập",
+        message: "Vui lòng đăng nhập để tiếp tục.",
+      });
+      navigate(location.pathname, { replace: true });
+    } else if (loggedOut) {
+      setToast({
+        open: true,
+        kind: "success",
+        title: "Đăng xuất",
+        message: "Bạn đã đăng xuất thành công.",
+      });
+      navigate(location.pathname, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const onSubmit = async (data: LoginFormValues) => {
     try {
-      const users = await http<User[]>(
-        `${USERS_URL}?email=${encodeURIComponent(data.email.trim().toLowerCase())}`
-      );
+      const email = data.email.trim().toLowerCase();
 
+      // 1) Ưu tiên kiểm tra trong bảng admins
+      const admins = await http<User[]>(`${ADMINS_URL}?email=${encodeURIComponent(email)}`);
+      if (admins.length > 0) {
+        const admin = admins[0];
+        if (admin.password !== data.password) {
+          setToast({
+            open: true,
+            kind: "error",
+            title: "Mật khẩu không đúng",
+            message: "Vui lòng nhập lại mật khẩu.",
+          });
+          return;
+        }
+
+        // Lưu session với role admin
+        localStorage.setItem(
+          "auth",
+          JSON.stringify({
+            userId: admin.id,
+            email: admin.email,
+            fullName: `${admin.firstName} ${admin.lastName}`,
+            role: "admin",
+          })
+        );
+        if (data.remember) localStorage.setItem("rememberEmail", admin.email);
+        else localStorage.removeItem("rememberEmail");
+
+        setToast({ open: true, kind: "success", title: "Thành công", message: "Đăng nhập quản trị thành công" });
+        setTimeout(() => navigate("/admin", { replace: true }), 1200);
+        return;
+      }
+
+      // 2) Không phải admin -> kiểm tra users (user thường)
+      const users = await http<User[]>(`${USERS_URL}?email=${encodeURIComponent(email)}`);
       if (users.length === 0) {
         setToast({
           open: true,
@@ -92,26 +149,21 @@ export default function Login() {
         return;
       }
 
-      // giả lập lưu session
+      // Lưu session với role user
       localStorage.setItem(
         "auth",
         JSON.stringify({
           userId: user.id,
           email: user.email,
           fullName: `${user.firstName} ${user.lastName}`,
+          role: "user",
         })
       );
       if (data.remember) localStorage.setItem("rememberEmail", user.email);
       else localStorage.removeItem("rememberEmail");
 
-      // toast thành công + điều hướng
-      setToast({
-        open: true,
-        kind: "success",
-        title: "Thành công",
-        message: "Đăng nhập thành công",
-      });
-      setTimeout(() => navigate("/homes", { replace: true }), 1500);
+      setToast({ open: true, kind: "success", title: "Thành công", message: "Đăng nhập thành công" });
+      setTimeout(() => navigate("/homes", { replace: true }), 1200);
     } catch (e) {
       console.error(e);
       setToast({
@@ -155,14 +207,17 @@ export default function Login() {
             </Alert>
           )}
 
-          <Grid container spacing={5} >
+          <Grid container spacing={5}>
             <Grid item xs={12} container spacing={1.5} width={"100%"}>
               <Typography variant="subtitle2" sx={{ mb: 0.5 }} fontWeight={600}>
                 Email
               </Typography>
               <TextField
-                type="email" fullWidth autoComplete="email"
-                error={!!errors.email} helperText={errors.email?.message}
+                type="email"
+                fullWidth
+                autoComplete="email"
+                error={!!errors.email}
+                helperText={errors.email?.message}
                 {...register("email")}
               />
             </Grid>
@@ -172,8 +227,11 @@ export default function Login() {
                 Mật khẩu
               </Typography>
               <TextField
-                type={showPassword ? "text" : "password"} fullWidth autoComplete="current-password"
-                error={!!errors.password} helperText={errors.password?.message}
+                type={showPassword ? "text" : "password"}
+                fullWidth
+                autoComplete="current-password"
+                error={!!errors.password}
+                helperText={errors.password?.message}
                 {...register("password")}
                 InputProps={{
                   endAdornment: (
@@ -225,6 +283,8 @@ export default function Login() {
           </Typography>
         </Box>
       </Container>
+
+      {/* Toast góc phải */}
       <Snackbar
         open={toast.open}
         onClose={() => setToast({ open: false })}
@@ -257,7 +317,11 @@ export default function Login() {
                 </Typography>
               </Box>
             </Stack>
-            <IconButton onClick={() => setToast({ open: false })} size="small" sx={{ color: "rgba(255,255,255,.7)", "&:hover": { color: "#fff" } }}>
+            <IconButton
+              onClick={() => setToast({ open: false })}
+              size="small"
+              sx={{ color: "rgba(255,255,255,.7)", "&:hover": { color: "#fff" } }}
+            >
               <Close fontSize="small" />
             </IconButton>
           </Stack>

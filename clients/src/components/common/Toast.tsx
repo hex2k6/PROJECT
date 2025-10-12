@@ -21,7 +21,7 @@ export default function Toast({
   open,
   title = "Thành công",
   message,
-  autoHideDuration = 3000,
+  autoHideDuration = 1000,
   onClose,
 }: ToastProps) {
   return (
