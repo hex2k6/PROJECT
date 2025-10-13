@@ -1,3 +1,4 @@
+// src/pages/admin/Courses.tsx
 import {
   Box, Container, Stack, Typography, Select, MenuItem, Button, TextField,
   InputAdornment, Table, TableHead, TableRow, TableCell, TableBody, Chip,
@@ -8,6 +9,7 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import AddIcon from "@mui/icons-material/Add";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState, AppDispatch } from "../../store";
@@ -47,6 +49,13 @@ export default function Courses(){
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
 
+
+  const [nameSort, setNameSort] = useState<"asc" | "desc">("asc");
+  const toggleNameSort = () => {
+    setNameSort(s => (s === "asc" ? "desc" : "asc"));
+    setPage(1);
+  };
+
   const [openForm, setOpenForm] = useState(false);
   const [editing, setEditing] = useState<Course|null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -61,8 +70,16 @@ export default function Courses(){
     let d = list;
     if(status!=="all") d = d.filter(c=>c.status===status);
     if(q.trim()) d = d.filter(c=>c.subject_name.toLowerCase().includes(q.toLowerCase()));
+
+    // sort tên theo mũi tên
+    d = [...d].sort(
+      (a, b) =>
+        a.subject_name.localeCompare(b.subject_name, "vi", { sensitivity: "base" }) *
+        (nameSort === "asc" ? 1 : -1)
+    );
+
     return d;
-  },[list,status,q]);
+  },[list, status, q, nameSort]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length/rowsPerPage));
   const safePage = Math.min(page, totalPages);
@@ -150,8 +167,29 @@ export default function Courses(){
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ fontWeight:700, bgcolor:"#f6f8fc", color:"text.secondary", py:1.5 }} width="60%">
-                  Tên môn học
+                <TableCell
+                  sx={{ fontWeight:700, bgcolor:"#f6f8fc", color:"text.secondary", py:1.5 }}
+                  width="60%"
+                >
+                  <Stack
+                    direction="row"
+                    spacing={0.5}
+                    alignItems="center"
+                    sx={{ cursor: "pointer", userSelect: "none", width: "fit-content" }}
+                    onClick={toggleNameSort}
+                  >
+                    <Typography component="span" fontWeight={700} color="text.secondary">
+                      Tên môn học
+                    </Typography>
+                    <ArrowBackOutlinedIcon
+                      sx={{
+                        fontSize: 18,
+                        transition: "transform .2s",
+                        transform: nameSort === "asc" ? "rotate(90deg)" : "rotate(-90deg)",
+                        color: "text.secondary",
+                      }}
+                    />
+                  </Stack>
                 </TableCell>
                 <TableCell sx={{ fontWeight:700, bgcolor:"#f6f8fc", color:"text.secondary", py:1.5 }} width="20%">
                   Trạng thái
@@ -173,7 +211,7 @@ export default function Courses(){
                   <TableCell><StatusChip value={c.status}/></TableCell>
                   <TableCell
                     align="center"
-                    onClick={(e)=>e.stopPropagation()} // tránh trigger navigation khi bấm icon
+                    onClick={(e)=>e.stopPropagation()}
                   >
                     <IconButton size="small" sx={{ color:"#ef4444", mr:0.5 }} onClick={()=>askDelete(c)}>
                       <DeleteOutlineIcon fontSize="small"/>

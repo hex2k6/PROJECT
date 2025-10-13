@@ -6,7 +6,7 @@ export default function LoadingScreen() {
       sx={{
         position: "fixed",
         inset: 0,
-        bgcolor: "rgba(255,255,255,0.6)",
+        bgcolor: "rgba(255, 255, 255, 0.79)",
         display: "grid",
         placeItems: "center",
         zIndex: 2000,

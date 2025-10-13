@@ -5,7 +5,7 @@ export const theme = createTheme({
     mode: "light",
     grey: { 100: "#f5f7fb" },
   },
-  shape: { borderRadius: 10 },
+ 
   components: {
    
     MuiButton: {
