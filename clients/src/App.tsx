@@ -4,7 +4,6 @@ import { theme } from "./theme";
 
 // Public
 import Homes from "./pages/home/Home";
-import Home from "./components/home";
 import Login from "./components/Login";
 import Register from "./components/Register";
 
@@ -23,8 +22,7 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           {/* public */}
-          <Route path="/" element={<Navigate to="/home" replace />} />
-          <Route path="/home" element={<Home />} />
+          <Route path="/" element={<Navigate to="/homes" replace />} />
           <Route path="/homes" element={<RequireAuth />}>
             <Route index element={<Homes/>} />
           </Route>
@@ -42,7 +40,7 @@ export default function App() {
           </Route>
 
           {/* fallback */}
-          <Route path="*" element={<Navigate to="/home" replace />} />
+          <Route path="*" element={<Navigate to="/homes" replace />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

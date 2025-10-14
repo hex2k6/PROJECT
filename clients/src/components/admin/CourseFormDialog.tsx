@@ -1,33 +1,65 @@
+// src/components/admin/CourseFormDialog.tsx
 import {
   Dialog, DialogTitle, DialogContent, DialogActions, Button,
   TextField, RadioGroup, FormControlLabel, Radio, Stack, Typography
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Course, CourseStatus } from "../../store/coursesSlice";
 
 type Props = {
   open: boolean;
   initial?: Partial<Course>;
   onClose: () => void;
-  // ⬅️ onSubmit bây giờ trả { subject_name, status } để khớp server
+  // Gửi đúng shape về slice/server
   onSubmit: (data: { subject_name: string; status: CourseStatus }) => void;
+  // ⬇️ danh sách hiện có để kiểm tra trùng tên (tùy chọn để không phá chỗ cũ)
+  existing?: Course[];
 };
 
-export default function CourseFormDialog({ open, initial, onClose, onSubmit }: Props) {
+export default function CourseFormDialog({ open, initial, onClose, onSubmit, existing }: Props) {
   const isEdit = Boolean(initial?.id);
-
-  // ⬅️ lấy từ subject_name (vẫn hiển thị 1 ô text như cũ)
   const [subjectName, setSubjectName] = useState(initial?.subject_name ?? "");
   const [status, setStatus] = useState<CourseStatus>(initial?.status ?? "active");
   const [touched, setTouched] = useState(false);
+  const [dupError, setDupError] = useState<string | null>(null);
+
+  // Chuẩn hoá chuỗi để so trùng
+  const norm = (s: string) => s.trim().toLowerCase();
+
+  // Kiểm tra trùng tên theo existing
+  const isDuplicate = useMemo(() => {
+    if (!existing || !subjectName.trim()) return false;
+    const target = norm(subjectName);
+    return existing.some(
+      (c) => norm(c.subject_name) === target && (!isEdit || c.id !== initial?.id)
+    );
+  }, [existing, subjectName, isEdit, initial?.id]);
 
   useEffect(() => {
     setSubjectName(initial?.subject_name ?? "");
     setStatus(initial?.status ?? "active");
     setTouched(false);
+    setDupError(null);
   }, [open, initial]);
 
-  const nameError = touched && !subjectName.trim();
+  useEffect(() => {
+    if (!touched) return;
+    if (!subjectName.trim()) setDupError("Tên môn học không được để trống");
+    else if (isDuplicate) setDupError("Tên môn học đã tồn tại");
+    else setDupError(null);
+  }, [touched, subjectName, isDuplicate]);
+
+  const handleSubmit = () => {
+    setTouched(true);
+    // tính lại lỗi trước khi submit
+    let err: string | null = null;
+    if (!subjectName.trim()) err = "Tên môn học không được để trống";
+    else if (isDuplicate) err = "Tên môn học đã tồn tại";
+    setDupError(err);
+    if (err) return;
+
+    onSubmit({ subject_name: subjectName.trim(), status });
+  };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -42,8 +74,8 @@ export default function CourseFormDialog({ open, initial, onClose, onSubmit }: P
               value={subjectName}
               onBlur={() => setTouched(true)}
               onChange={(e) => setSubjectName(e.target.value)}
-              error={!!nameError}
-              helperText={nameError ? "Tên môn học không được để trống" : " "}
+              error={touched && (!!dupError)}
+              helperText={touched && dupError ? dupError : " "}
             />
           </div>
 
@@ -63,15 +95,7 @@ export default function CourseFormDialog({ open, initial, onClose, onSubmit }: P
 
       <DialogActions>
         <Button onClick={onClose}>Hủy</Button>
-        <Button
-          variant="contained"
-          onClick={() => {
-            setTouched(true);
-            if (!subjectName.trim()) return;
-            // ⬅️ gửi đúng shape cho slice/server
-            onSubmit({ subject_name: subjectName.trim(), status });
-          }}
-        >
+        <Button variant="contained" onClick={handleSubmit}>
           {isEdit ? "Lưu" : "Thêm"}
         </Button>
       </DialogActions>

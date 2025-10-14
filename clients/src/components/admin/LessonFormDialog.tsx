@@ -1,15 +1,16 @@
+// src/components/admin/LessonFormDialog.tsx
 import {
   Dialog, DialogTitle, DialogContent, DialogActions, Button,
-  TextField, Stack, Typography, MenuItem, Select, FormControl, RadioGroup,
-  Radio, FormControlLabel
+  TextField, Stack, Typography, MenuItem, Select, FormControl,
+  RadioGroup, Radio, FormControlLabel
 } from "@mui/material";
-import { useEffect, useState } from "react";
-import type { LessonStatus } from "../../store/lessonsSlice";
+import { useEffect, useMemo, useState } from "react";
+import type { Lesson, LessonStatus } from "../../store/lessonsSlice";
 import type { Course } from "../../store/coursesSlice";
 
 type Props = {
   open: boolean;
-  subjects: Course[];                             // để chọn môn học
+  subjects: Course[];   // để chọn môn học
   initial?: {
     id?: number;
     subject_id?: number;
@@ -19,19 +20,37 @@ type Props = {
   };
   onClose: () => void;
   onSubmit: (data: { subject_id: number; lesson_name: string; time: number; status: LessonStatus }) => void;
+  // ⬇️ danh sách bài học hiện có để kiểm tra trùng trong cùng môn (tùy chọn)
+  existing?: Lesson[];
 };
 
-export default function LessonFormDialog({ open, subjects, initial, onClose, onSubmit }: Props) {
+export default function LessonFormDialog({ open, subjects, initial, onClose, onSubmit, existing }: Props) {
   const isEdit = Boolean(initial?.id);
 
-  const [subjectId, setSubjectId]   = useState<number>(initial?.subject_id ?? subjects[0]?.id ?? 0);
-  const [name, setName]             = useState(initial?.lesson_name ?? "");
-  const [time, setTime]             = useState<number>(initial?.time ?? 45);
-  const [status, setStatus]         = useState<LessonStatus>(initial?.status ?? "incomplete");
+  const [subjectId, setSubjectId] = useState<number>(initial?.subject_id ?? subjects[0]?.id ?? 0);
+  const [name, setName]         = useState(initial?.lesson_name ?? "");
+  const [time, setTime]         = useState<number>(initial?.time ?? 45);
+  const [status, setStatus]     = useState<LessonStatus>(initial?.status ?? "incomplete");
 
-  const [touched, setTouched]       = useState(false);
-  const nameError = touched && !name.trim();
+  const [touched, setTouched]   = useState(false);
+  const [dupError, setDupError] = useState<string | null>(null);
+
+  const nameEmpty = touched && !name.trim();
   const timeError = touched && (!time || time <= 0);
+
+  const norm = (s: string) => s.trim().toLowerCase();
+
+  // Kiểm tra TRÙNG tên trong CÙNG MÔN
+  const isDuplicate = useMemo(() => {
+    if (!existing || !name.trim() || !subjectId) return false;
+    const target = norm(name);
+    return existing.some(
+      (l) =>
+        l.subject_id === subjectId &&
+        norm(l.lesson_name) === target &&
+        (!isEdit || l.id !== initial?.id)
+    );
+  }, [existing, name, subjectId, isEdit, initial?.id]);
 
   useEffect(() => {
     setSubjectId(initial?.subject_id ?? subjects[0]?.id ?? 0);
@@ -39,7 +58,31 @@ export default function LessonFormDialog({ open, subjects, initial, onClose, onS
     setTime(initial?.time ?? 45);
     setStatus(initial?.status ?? "incomplete");
     setTouched(false);
+    setDupError(null);
   }, [open, initial, subjects]);
+
+  useEffect(() => {
+    if (!touched) return;
+    if (!name.trim()) setDupError("Tên bài học không được để trống");
+    else if (!subjectId) setDupError("Vui lòng chọn môn học");
+    else if (isDuplicate) setDupError("Tên bài học đã tồn tại trong môn ");
+    else setDupError(null);
+  }, [touched, name, subjectId, isDuplicate]);
+
+  const handleSubmit = () => {
+    setTouched(true);
+
+    let err: string | null = null;
+    if (!name.trim()) err = "Tên bài học không được để trống";
+    else if (!subjectId) err = "Vui lòng chọn môn học";
+    else if (!time || time <= 0) err = "Thời gian phải lớn hơn 0";
+    else if (isDuplicate) err = "Tên bài học đã tồn tại trong môn ";
+
+    setDupError(err);
+    if (err) return;
+
+    onSubmit({ subject_id: subjectId, lesson_name: name.trim(), time, status });
+  };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -68,8 +111,12 @@ export default function LessonFormDialog({ open, subjects, initial, onClose, onS
               value={name}
               onBlur={() => setTouched(true)}
               onChange={(e) => setName(e.target.value)}
-              error={!!nameError}
-              helperText={nameError ? "Tên bài học không được để trống" : " "}
+              error={touched && (!!dupError || !!nameEmpty)}
+              helperText={
+                touched
+                  ? (dupError ?? (nameEmpty ? "Tên bài học không được để trống" : " "))
+                  : " "
+              }
             />
           </div>
 
@@ -99,14 +146,7 @@ export default function LessonFormDialog({ open, subjects, initial, onClose, onS
 
       <DialogActions>
         <Button onClick={onClose}>Hủy</Button>
-        <Button
-          variant="contained"
-          onClick={() => {
-            setTouched(true);
-            if (!name.trim() || !time || time <= 0 || !subjectId) return;
-            onSubmit({ subject_id: subjectId, lesson_name: name.trim(), time, status });
-          }}
-        >
+        <Button variant="contained" onClick={handleSubmit}>
           {isEdit ? "Lưu" : "Thêm"}
         </Button>
       </DialogActions>
